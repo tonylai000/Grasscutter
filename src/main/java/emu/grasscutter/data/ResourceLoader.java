@@ -66,6 +66,8 @@ public class ResourceLoader {
 		// Load scene points - must be done AFTER resources are loaded
 		loadScenePoints();
 		loadNpcBornData();
+		// Load default home layout
+		loadHomeworldDefaultSaveData();
 		// Custom - TODO move this somewhere else
 		try {
 			GameData.getAvatarSkillDepotDataMap().get(504).setAbilities(
@@ -434,6 +436,26 @@ public class ResourceLoader {
 		}
 
 		Grasscutter.getLogger().info("Loaded " + GameData.getSceneNpcBornData().size() + " SceneNpcBornDatas.");
+	}
+	
+	@SneakyThrows
+	private static void loadHomeworldDefaultSaveData(){
+		var folder = Files.list(Path.of(RESOURCE("BinOutput/HomeworldDefaultSave"))).toList();
+		var pattern = Pattern.compile("scene(.*)_home_config.json");
+
+		for(var file : folder){
+			var matcher = pattern.matcher(file.getFileName().toString());
+			if(!matcher.find()){
+				continue;
+			}
+			var sceneId = matcher.group(1);
+
+			var data = Grasscutter.getGsonFactory().fromJson(Files.readString(file), HomeworldDefaultSaveData.class);
+
+			GameData.getHomeworldDefaultSaveData().put(Integer.parseInt(sceneId), data);
+		}
+
+		Grasscutter.getLogger().info("Loaded " + GameData.getHomeworldDefaultSaveData().size() + " HomeworldDefaultSaveDatas.");
 	}
 	// BinOutput configs
 	
